@@ -1,26 +1,34 @@
-objects=windows.o window.o
+# includes
+glew_inc = D:/dev/lib/glew/src/include
+glfw_inc = D:/dev/lib/glfw/src/include
+glm_inc = D:/dev/lib/glm/
 
-glew_include=D:/Libraries/glew/include/
-glew_lib=D:/Libraries/glew/lib/
-glfw_include=D:/Libraries/glfw/include/
-glfw_lib=D:/Libraries/glfw/src/
-glm_include=D:/Libraries/glm/
-	
-learn: $(objects) learn.o
-	g++ $(addprefix bin/,$?) -o learn.exe -L$(glfw_lib) -L$(glew_lib) -lglew32 -lglu32 -lglfw3 -lopengl32 -lgdi32
+# libs
+glfw_lib = D:/dev/lib/glfw/glfw-mingw/src
+glew_lib = D:/dev/lib/glew/glew-mingw/lib/
 
-dynamic: $(objects)
-	g++ -shared $(addprefix bin/,$?) -o libnova.so -L$(glfw_lib) -L$(glew_lib) -lglew32 -lglu32 -lglfw3 -lopengl32 -lgdi32
-	
+# compiler
+CXX = g++
+CXXFLAGS = -std=c++11 -pthread
+AR = ar
+
+# objects
+objects = bin/window.o
+testobjects = tests/test.o
+
+# Rules
 static: $(objects)
-	copy $(subst /,\\,$(glfw_lib))libglfw3.a libnova.a
-	ar rcs libnova.a $(addprefix bin/,$?)
+	$(AR) rcs lib/libnova.a $(objects)
+	
+dynamic: $(objects)
+	$(CXX) -shared -o lib/libnova.so $(addprefix bin/, $(objects))
 
-test_dynamic: test.o dynamic
-	g++ bin/test.o -o test.exe libnova.so -L$(glfw_lib) -L$(glew_lib) -lglew32 -glu32 -lglfw3 -lopengl32 -lgdi32
+tests: static $(testobjects)
+	$(CXX) -o tests.exe $(testobjects) -Llib -lnova
 
-test_static: test.o static
-	g++ bin/test.o -o test.exe -L$(glew_lib) -L. -lnova -lglew32 -glu32 -lopengl32 -lgdi32
+# Patterns
+bin/%.o :: src/%.cpp
+	$(CXX) $(CXXFLAGS) -o $@ -c $< -I$(glew_inc) -I$(glfw_inc) -I$(glm_inc) -Iinclude
 
-%.o : src/cpp/%.cpp
-	g++ -c -std=c++11 -pthread -o bin/$@ $< -I$(glew_include) -I$(glfw_include) -I$(glm_include)
+tests/%.o :: tests/%.cpp
+	$(CXX) $(CXXFLAGS) -o $@ -c $< -I$(glew_inc) -I$(glfw_inc) -I$(glm_inc) -Iinclude

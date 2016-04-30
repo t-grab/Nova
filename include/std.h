@@ -1,5 +1,5 @@
-#ifndef STD_HPP
-#define STD_HPP
+#ifndef NOVA_STD_H
+#define NOVA_STD_H
 
 #include <vector>
 #include <string>
