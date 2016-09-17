@@ -2,21 +2,33 @@
 #define NOVA_WINDOW_H
 
 #include "std.h"
-#include <thread>
+#include "shader.h"
+#include <boost/thread.hpp>
 
 namespace Nova {
+    using namespace Nova;
+    using namespace std;
+    
     class Window {
         GLFWwindow* handle;
-        
         int width;
         int height;
+        string title;
+        
+        boost::thread* thread;
+        
+        static void main(Window& window); 
         
     public:
-        Window(int width, int height);
+        Window(const string& title, int width, int height);
         ~Window();
         
+        boost::thread* getThread();
+                
+        bool closing();
+
         void open();
-        void close();
+        void close();        
     };
 }
 
