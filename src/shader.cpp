@@ -30,10 +30,10 @@ Shader::Shader(const std::string& vertexSrc, const std::string& fragmentSrc)
         char log[max_length];
 
         glGetProgramInfoLog(handle, max_length, &actual_length, log);
-        std::cerr << "Error: Shader program " << handle << " did not link!" << std::endl
-                  << "Linker Output: " << std::endl
-                  << log << std::endl;
-        throw std::runtime_error("Shader program did not link!");
+        error << "Error: Shader program " << handle << " did not link!\n"
+              << "Linker Output: \n"
+              << log << "\n"
+              << Error::Throw;
     }
 }
 
@@ -52,10 +52,10 @@ GLuint Shader::compileShader(const std::string& src, GLuint type) {
         char log[max_length];
 
         glGetShaderInfoLog(shader, max_length, &actual_length, log);
-        std::cerr << "Error: Shader " << shader << " did not compile!" << std::endl
-                  << "Compiler Output: " << std::endl
-                  << log << std::endl;
-        throw std::runtime_error("Shader did not compile!");
+        error << "Error: Shader " << shader << " did not compile!\n"
+              << "Compiler Output: \n"
+              << log << "\n"
+              << Error::Throw;
     }
 
     return shader;

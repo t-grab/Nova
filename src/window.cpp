@@ -6,12 +6,20 @@ using namespace std;
 
 bool glfwError{false};
 
+static void glfwErrorCallback(int error, const char* description) {
+    glLog << "GLFW Error: code " << error << ", msg: " << description << "\n"
+          << Log::Commit; 
+}
+
 static bool initDependencies() {
     static bool initialized{false};
     
     if (!initialized) {
+        glLog << "Starting GLFW\n" << glfwGetVersionString() << "\n" << Log::Commit;
+        glfwSetErrorCallback(glfwErrorCallback);
+
         if (!glfwInit()) {
-            cerr << "Error: Could not start GLFW!" << endl;
+            glLog << "Could not start GLFW\n" << Log::Commit; 
             return false;
         }
         
@@ -20,11 +28,6 @@ static bool initDependencies() {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_SAMPLES, 4);
-                    
-        glfwMakeContextCurrent(NULL);
-        
-        glewExperimental = GL_TRUE;
-        glewInit();
         
         initialized = true;    
     }
@@ -57,7 +60,7 @@ void Window::open() {
     if (!handle) {
         glfwError = true;
         glfwTerminate();
-        throw runtime_error("Window::open(): Could not open window with GLFW!");
+        error << "Window::open(): Could not open window with GLFW!" << Error::Throw;
     }    
     
     thread = new boost::thread{Window::main, *this};    
