@@ -22,8 +22,8 @@ void Nova::join(std::vector<std::reference_wrapper<Nova::Window>> windows) {
 std::mutex Window::windows_mutex;
 std::vector<std::unique_ptr<Window>> Window::windows;
 
-Window::Window(const string& title, int width, int height)
-    : handle(0), width{width}, height{height}, title{title}, thread{0}
+Window::Window(const string& title, int width, int height, std::shared_ptr<Program> prg)
+    : handle(0), width{width}, height{height}, title{title}, thread{0}, program{prg}
 { }
 
 Window::~Window() {
@@ -63,8 +63,27 @@ void Window::handle_keys() {
         close();
 }
 
-Window& Window::create(const string& title, int width, int height) {
-    unique_ptr<Window> new_window(std::move(new Window(title, width, height)));
+void Window::update_fps_counter() {
+    double current_seconds;
+    double elapsed_seconds;
+
+    current_seconds = glfwGetTime();
+    elapsed_seconds = current_seconds - frame_counter.previous_seconds;
+
+    if (elapsed_seconds > 0.25) {
+        frame_counter.previous_seconds = current_seconds;
+        double fps = frame_counter.frame_count / static_cast<double>(elapsed_seconds);
+        std::stringstream stream;
+        stream << title << ", OpenGL @ fps: " << std::fixed << std::setprecision(2) << fps;
+        glfwSetWindowTitle(handle, stream.str().c_str());
+        frame_counter.frame_count = 0;
+    }
+
+    frame_counter.frame_count++;
+}
+
+Window& Window::create(const string& title, int width, int height, std::shared_ptr<Program> prg) {
+    unique_ptr<Window> new_window(std::move(new Window(title, width, height, prg)));
     
     windows_mutex.lock();
     windows.push_back(std::move(new_window));
@@ -97,41 +116,17 @@ void Window::main(Window& window) {
 
     glfwSetWindowSizeCallback(window.handle, Window::glfw_window_size_callback);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    
-    GLfloat points[] = {
-         0.0f,  0.5f,  0.0f,
-         0.5f, -0.5f,  0.0f,
-        -0.5f, -0.5f,  0.0f, 
-    };
-
-    GLuint vbo = 0;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-
-    GLuint vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    Shader shader(Shader::stdVertex, Shader::stdFragment);
-    glUseProgram(shader.id());
-
+    window.program->init();
     while (!glfwWindowShouldClose(window.handle)) {
+        window.update_fps_counter();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, window.width, window.height);
-        
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
 
+        window.program->main();
+
+        glfwSwapBuffers(window.handle);
         glfwPollEvents();
-        window.handle_keys();        
-
-        glfwSwapBuffers(window.handle);        
-    }
+        window.handle_keys();
+    }    
+    window.program->finish();
 }

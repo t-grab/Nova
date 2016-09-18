@@ -4,25 +4,31 @@
 #include "std.h"
 #include "shader.h"
 #include "nova.h"
+#include "program.h"
 #include <mutex>
 #include <boost/thread.hpp>
 
-namespace Nova {
-    using namespace Nova;
-    using namespace std;
-    
+namespace Nova {    
     class Window {
         GLFWwindow* handle;
         int width;
         int height;
-        string title;
+        std::string title;
         boost::thread* thread;
-        
-        Window(const string& title, int width, int height);
+        std::shared_ptr<Nova::Program> program;
+
+        struct FrameCounter {
+            double previous_seconds;
+            int frame_count;
+        } frame_counter;
+
+        Window(const std::string& title, int width, int height,
+               std::shared_ptr<Nova::Program> prg);
         void handle_keys();
+        void update_fps_counter();
 
         static std::mutex windows_mutex;
-        static std::vector<unique_ptr<Window>> windows;
+        static std::vector<std::unique_ptr<Window>> windows;
         static Window& get_window(GLFWwindow* handle);
         static void glfw_window_size_callback(GLFWwindow* handle, int width, int height);
         static void main(Window& window); 
@@ -34,7 +40,8 @@ namespace Nova {
         void open();
         void close();  
 
-        static Window& create(const string& title, int width, int height);      
+        static Window& create(const std::string& title, int width, int height,
+                              std::shared_ptr<Nova::Program> prg);      
     };
 
     void join(Window& window);

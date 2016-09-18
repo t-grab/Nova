@@ -6,13 +6,14 @@ const char* Shader::stdVertex = "#version 410\n"
                                 "   gl_Position = vec4(vp, 1.0);"
                                 "}";
 const char* Shader::stdFragment = "#version 410\n"
+                                  "uniform vec4 input_colour;"
                                   "out vec4 frag_colour;"
                                   "void main() {"
-                                  "    frag_colour = vec4(1.0, 0.0, 1.0, 1.0);"
+                                  "    frag_colour = input_colour;"
                                   "}"; 
 
 Shader::Shader(const std::string& vertexSrc, const std::string& fragmentSrc)
-    : handle(0)
+    : handle(0), input_colour(0)
 {
     GLuint vertex = compileShader(vertexSrc, GL_VERTEX_SHADER);
     GLuint fragment = compileShader(fragmentSrc, GL_FRAGMENT_SHADER);
@@ -35,6 +36,8 @@ Shader::Shader(const std::string& vertexSrc, const std::string& fragmentSrc)
               << log << "\n"
               << Error::Throw;
     }
+
+    input_colour = glGetUniformLocation(handle, "input_colour");
 }
 
 GLuint Shader::compileShader(const std::string& src, GLuint type) {
@@ -63,4 +66,8 @@ GLuint Shader::compileShader(const std::string& src, GLuint type) {
 
 GLuint Shader::id() const {
     return handle;
+}
+
+GLint Shader::colour() const {
+    return input_colour;
 }

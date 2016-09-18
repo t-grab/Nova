@@ -5,6 +5,7 @@
 
 class Shader {
     GLuint handle;
+    GLint input_colour;
 
     GLuint compileShader(const std::string& src, GLuint type);
 
@@ -14,6 +15,7 @@ public:
 
     Shader(const std::string& vertexSrc, const std::string& fragmentSrc);
     GLuint id() const;
+    GLint colour() const;
 };
 
 #endif

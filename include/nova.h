@@ -2,12 +2,14 @@
 #define NOVA_H
 
 #include "std.h"
-#include "window.h"
 #include "shader.h"
+#include "window.h"
+#include "program.h"
 
 namespace Nova {
     bool init();
     void terminate();
+    void log_params();
 }
 
 #endif

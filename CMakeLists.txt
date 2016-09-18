@@ -17,7 +17,8 @@ set(LIB_FILES
     src/nova.cpp
     src/std.cpp
     src/shader.cpp
-    src/window.cpp)
+    src/window.cpp
+    src/program.cpp)
 
 set(TEST_FILES
     tests/test.cpp)

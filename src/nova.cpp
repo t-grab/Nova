@@ -1,5 +1,7 @@
 #include "../include/nova.h"
 
+Log glLog("gl.log");
+
 static void glfwErrorCallback(int error, const char* description) {
     glLog << "GLFW Error: code " << error << ", msg: " << description << "\n"
           << Log::Commit; 
@@ -32,4 +34,52 @@ bool Nova::init() {
 void Nova::terminate() {
     if (Nova::init())
         glfwTerminate();
+}
+
+void Nova::log_params() {
+    static std::vector<GLenum> params = {
+        GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS,
+        GL_MAX_CUBE_MAP_TEXTURE_SIZE,
+        GL_MAX_DRAW_BUFFERS,
+        GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,
+        GL_MAX_TEXTURE_IMAGE_UNITS,
+        GL_MAX_TEXTURE_SIZE,
+        GL_MAX_VARYING_FLOATS,
+        GL_MAX_VERTEX_ATTRIBS,
+        GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS,
+        GL_MAX_VERTEX_UNIFORM_COMPONENTS,
+        GL_MAX_VIEWPORT_DIMS,
+        GL_STEREO,
+    };
+
+    static std::vector<std::string> names = {
+        "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS",
+        "GL_MAX_CUBE_MAP_TEXTURE_SIZE",
+        "GL_MAX_DRAW_BUFFERS",
+        "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS",
+        "GL_MAX_TEXTURE_IMAGE_UNITS",
+        "GL_MAX_TEXTURE_SIZE",
+        "GL_MAX_VARYING_FLOATS",
+        "GL_MAX_VERTEX_ATTRIBS",
+        "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS",
+        "GL_MAX_VERTEX_UNIFORM_COMPONENTS",
+        "GL_MAX_VIEWPORT_DIMS",
+        "GL_STEREO",
+    };
+
+    glLog << "GL Context Params:\n";
+    for (int i = 0; i < params.size() - 2; ++i) {
+        int v = 0;
+        glGetIntegerv(params[i], &v);
+        glLog << names[i] << " " << v << "\n";
+    }
+
+    int v[] = { 0, 0 };
+    glGetIntegerv(params[params.size() - 2], v);
+    glLog << names[names.size() - 2] << " " << v[0] << " " << v[1] << "\n";
+
+    unsigned char s = 0;
+    glGetBooleanv(params[params.size() - 1], &s);
+    glLog << names[names.size() - 1] << " " << static_cast<uint>(s) << "\n"
+          <<Log::Commit;    
 }
