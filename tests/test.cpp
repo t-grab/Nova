@@ -5,13 +5,21 @@ using std::endl;
 
 #include "../include/nova.h"
 
+const std::string TITLE = "Nova example Application";
+const std::string END = "Closing Nova example application";
+
 int main() {
-    std::cout << "Nova - Tester" << std::endl;
-
-    Nova::Window window{"Window 1", 640, 480};
-
     try {
-        window.open();
+        std::cout << TITLE << std::endl;
+
+        Nova::Window& window = Nova::Window::create("Window 1", 640, 480);
+        window.open();        
+        while(!window.closing())
+            glfwPollEvents();
+        Nova::join(window);
+
+        std::cout << END << std::endl;
+        return 0;
     }
     catch (std::runtime_error& e) {
         std::cout << "Runtime error: " << e.what() << std::endl;
@@ -21,14 +29,4 @@ int main() {
         std::cout << "Unknown error!" << std::endl;
         return 1;
     }
-    std::cout << "End of Tester" << std::endl;
-
-    while(!window.closing())
-        glfwPollEvents();
-
-    window.getThread()->join();
-
-    std::cout << "Ending main now" << std::endl;
-
-    return 0;
 }

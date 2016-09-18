@@ -3,5 +3,6 @@
 
 #include "std.h"
 #include "window.h"
+#include "shader.h"
 
 #endif

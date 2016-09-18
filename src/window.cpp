@@ -2,9 +2,9 @@
 using namespace Nova;
 using namespace std;
 
-// ------------------- Support functions and variables -------------------//
-
-bool glfwError{false};
+////////////////////////////////////////////////////////////////////////////////
+////////// SUPPORT FUNCTIONS AND VARIABLES /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 static void glfwErrorCallback(int error, const char* description) {
     glLog << "GLFW Error: code " << error << ", msg: " << description << "\n"
@@ -35,10 +35,24 @@ static bool initDependencies() {
     return initialized;
 }
 
-// ------------------- Window implementation ------------------- //
+void Nova::join(Nova::Window& window) {
+    window.getThread()->join();
+}
+
+void Nova::join(std::vector<std::reference_wrapper<Nova::Window>> windows) {
+    for (auto& window : windows)
+        Nova::join(window);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////// WINDOW IMPLEMENTATION ///////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+std::mutex Window::creation_mutex;
+std::vector<std::unique_ptr<Window>> Window::windows;
 
 Window::Window(const string& title, int width, int height)
-    : width{width}, height{height}, title{title}, thread{0}
+    : handle(0), width{width}, height{height}, title{title}, thread{0}
 { }
 
 Window::~Window() {
@@ -53,27 +67,60 @@ bool Window::closing() {
 }
 
 void Window::open() {
-    if (glfwError || !initDependencies())
+    if (!initDependencies())
         return;
         
     handle = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
-    if (!handle) {
-        glfwError = true;
+    if (!handle) {        
         glfwTerminate();
         error << "Window::open(): Could not open window with GLFW!" << Error::Throw;
     }    
-    
-    thread = new boost::thread{Window::main, *this};    
+
+    thread = new boost::thread{Window::main, std::ref(*this)};    
 }
 
 void Window::close() {
     glfwSetWindowShouldClose(handle, GL_TRUE);
 }
 
-void Window::main(Window& window) {    
+void Window::handle_keys() {
+    if (GLFW_PRESS == glfwGetKey(handle, GLFW_KEY_ESCAPE))
+        close();
+}
+
+Window& Window::create(const string& title, int width, int height) {
+    unique_ptr<Window> new_window(std::move(new Window(title, width, height)));
+    
+    creation_mutex.lock();
+    windows.push_back(std::move(new_window));
+    unique_ptr<Window>& window_ptr = windows.at(windows.size() - 1);
+    Window& window_ref = *(window_ptr.get());
+    creation_mutex.unlock();    
+
+    return window_ref;
+}
+
+Window& Window::get_window(GLFWwindow* handle) {
+    auto window_iter = std::find_if(windows.begin(), windows.end(),
+    [handle](const unique_ptr<Window>& window) {
+        return window->handle == handle;
+    });
+
+    return *(window_iter->get());
+}
+
+void Window::glfw_window_size_callback(GLFWwindow* handle, int width, int height) {
+    Window& window = get_window(handle); 
+    window.width = width;
+    window.height = height;
+}
+
+void Window::main(Window& window) {
     glfwMakeContextCurrent(window.handle);
     glewExperimental = GL_TRUE;
     glewInit();
+
+    glfwSetWindowSizeCallback(window.handle, Window::glfw_window_size_callback);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -108,6 +155,8 @@ void Window::main(Window& window) {
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwPollEvents();
+        window.handle_keys();        
+
         glfwSwapBuffers(window.handle);        
     }
 }

@@ -7,6 +7,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <memory>
+#include <functional>
+#include <algorithm>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
