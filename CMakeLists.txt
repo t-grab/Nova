@@ -14,6 +14,7 @@ link_directories(D:/dev/lib/glfw/glfw-mingw/src
                  /mingw64/lib)
 
 set(LIB_FILES
+    src/nova.cpp
     src/std.cpp
     src/shader.cpp
     src/window.cpp)

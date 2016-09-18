@@ -5,4 +5,9 @@
 #include "window.h"
 #include "shader.h"
 
+namespace Nova {
+    bool init();
+    void terminate();
+}
+
 #endif

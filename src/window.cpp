@@ -6,35 +6,6 @@ using namespace std;
 ////////// SUPPORT FUNCTIONS AND VARIABLES /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-static void glfwErrorCallback(int error, const char* description) {
-    glLog << "GLFW Error: code " << error << ", msg: " << description << "\n"
-          << Log::Commit; 
-}
-
-static bool initDependencies() {
-    static bool initialized{false};
-    
-    if (!initialized) {
-        glLog << "Starting GLFW\n" << glfwGetVersionString() << "\n" << Log::Commit;
-        glfwSetErrorCallback(glfwErrorCallback);
-
-        if (!glfwInit()) {
-            glLog << "Could not start GLFW\n" << Log::Commit; 
-            return false;
-        }
-        
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
-        
-        initialized = true;    
-    }
-    
-    return initialized;
-}
-
 void Nova::join(Nova::Window& window) {
     window.getThread()->join();
 }
@@ -48,7 +19,7 @@ void Nova::join(std::vector<std::reference_wrapper<Nova::Window>> windows) {
 ////////// WINDOW IMPLEMENTATION ///////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-std::mutex Window::creation_mutex;
+std::mutex Window::windows_mutex;
 std::vector<std::unique_ptr<Window>> Window::windows;
 
 Window::Window(const string& title, int width, int height)
@@ -56,6 +27,10 @@ Window::Window(const string& title, int width, int height)
 { }
 
 Window::~Window() {
+    windows_mutex.lock();
+    if (windows.size() == 1U)
+        Nova::terminate();
+    windows_mutex.unlock();    
 } 
 
 boost::thread* Window::getThread() {
@@ -67,7 +42,7 @@ bool Window::closing() {
 }
 
 void Window::open() {
-    if (!initDependencies())
+    if (!init())
         return;
         
     handle = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
@@ -91,11 +66,11 @@ void Window::handle_keys() {
 Window& Window::create(const string& title, int width, int height) {
     unique_ptr<Window> new_window(std::move(new Window(title, width, height)));
     
-    creation_mutex.lock();
+    windows_mutex.lock();
     windows.push_back(std::move(new_window));
     unique_ptr<Window>& window_ptr = windows.at(windows.size() - 1);
     Window& window_ref = *(window_ptr.get());
-    creation_mutex.unlock();    
+    windows_mutex.unlock();    
 
     return window_ref;
 }

@@ -3,6 +3,7 @@
 
 #include "std.h"
 #include "shader.h"
+#include "nova.h"
 #include <mutex>
 #include <boost/thread.hpp>
 
@@ -20,7 +21,7 @@ namespace Nova {
         Window(const string& title, int width, int height);
         void handle_keys();
 
-        static std::mutex creation_mutex;
+        static std::mutex windows_mutex;
         static std::vector<unique_ptr<Window>> windows;
         static Window& get_window(GLFWwindow* handle);
         static void glfw_window_size_callback(GLFWwindow* handle, int width, int height);
