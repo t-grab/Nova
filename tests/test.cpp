@@ -34,12 +34,12 @@ public:
 
         Shader shader(Shader::stdVertex, Shader::stdFragment);
         glUseProgram(shader.id());
-        glUniform4f(shader.colour(), 2.0f, 0.7f, 0.7f, 1.0f);
+        glUniform4f(shader.colour(), 0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     void main() {
         glBindVertexArray(m_vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_POINTS, 0, 3);
     }
 
     void finish() {
