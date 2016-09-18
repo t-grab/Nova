@@ -8,3 +8,5 @@ void Nova::Program::init() {
     glDepthFunc(GL_LESS);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 }
+
+void Nova::Program::on_resize(int width, int height) { }

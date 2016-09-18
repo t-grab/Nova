@@ -2,8 +2,6 @@
 #define NOVA_WINDOW_H
 
 #include "std.h"
-#include "shader.h"
-#include "nova.h"
 #include "program.h"
 #include <mutex>
 #include <boost/thread.hpp>

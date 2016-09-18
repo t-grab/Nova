@@ -9,6 +9,8 @@ namespace Nova {
         virtual void init();
         virtual void main() = 0;
         virtual void finish() = 0;
+
+        virtual void on_resize(int width, int height);
     };
 }
 

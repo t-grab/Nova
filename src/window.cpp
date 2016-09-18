@@ -1,18 +1,18 @@
 #include "../include/window.h"
+#include "../include/nova.h"
 using namespace Nova;
-using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////// SUPPORT FUNCTIONS AND VARIABLES /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void Nova::join(Nova::Window& window) {
+void Nova::join(Window& window) {
     window.getThread()->join();
 }
 
-void Nova::join(std::vector<std::reference_wrapper<Nova::Window>> windows) {
+void Nova::join(std::vector<std::reference_wrapper<Window>> windows) {
     for (auto& window : windows)
-        Nova::join(window);
+        join(window);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,8 +22,9 @@ void Nova::join(std::vector<std::reference_wrapper<Nova::Window>> windows) {
 std::mutex Window::windows_mutex;
 std::vector<std::unique_ptr<Window>> Window::windows;
 
-Window::Window(const string& title, int width, int height, std::shared_ptr<Program> prg)
-    : handle(0), width{width}, height{height}, title{title}, thread{0}, program{prg}
+Window::Window(const std::string& title, int width, int height,
+               std::shared_ptr<Program> prg)
+        : handle(0), width{width}, height{height}, title{title}, thread{0}, program{prg}
 { }
 
 Window::~Window() {
@@ -82,12 +83,17 @@ void Window::update_fps_counter() {
     frame_counter.frame_count++;
 }
 
-Window& Window::create(const string& title, int width, int height, std::shared_ptr<Program> prg) {
-    unique_ptr<Window> new_window(std::move(new Window(title, width, height, prg)));
+////////////////////////////////////////////////////////////////////////////////
+////////// WINDOW IMPLEMENTATION - STATIC METHODS //////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+Window& Window::create(const std::string& title, int width, int height,
+                       std::shared_ptr<Program> prg) {
+    std::unique_ptr<Window> new_window(std::move(new Window(title, width, height, prg)));
     
     windows_mutex.lock();
     windows.push_back(std::move(new_window));
-    unique_ptr<Window>& window_ptr = windows.at(windows.size() - 1);
+    std::unique_ptr<Window>& window_ptr = windows.at(windows.size() - 1);
     Window& window_ref = *(window_ptr.get());
     windows_mutex.unlock();    
 
@@ -96,7 +102,7 @@ Window& Window::create(const string& title, int width, int height, std::shared_p
 
 Window& Window::get_window(GLFWwindow* handle) {
     auto window_iter = std::find_if(windows.begin(), windows.end(),
-    [handle](const unique_ptr<Window>& window) {
+    [handle](const std::unique_ptr<Window>& window) {
         return window->handle == handle;
     });
 
@@ -107,6 +113,7 @@ void Window::glfw_window_size_callback(GLFWwindow* handle, int width, int height
     Window& window = get_window(handle); 
     window.width = width;
     window.height = height;
+    window.program->on_resize(width, height);
 }
 
 void Window::main(Window& window) {
