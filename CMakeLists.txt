@@ -1,17 +1,25 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(Nova)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(BOOST REQUIRED)
+find_package(GLM REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(GLFW REQUIRED)
+
 include_directories(include
-                    D:/dev/lib/glew/src/include
-                    D:/dev/lib/glfw/src/include
-                    D:/dev/lib/glm
-                    /mingw64/include)
-link_directories(D:/dev/lib/glfw/glfw-mingw/src
-                 D:/dev/lib/glew/glew-mingw/lib
-                 /mingw64/lib)
+                    ${BOOST_INCLUDE_DIR}
+                    ${GLFW_INCLUDE_DIR}
+                    ${GLEW_INCLUDE_DIR}
+                    ${GLM_INCLUDE_DIR})
+
+if (WIN32)
+    link_directories(${BOOST_LIBRARY_DIR})
+endif ()
 
 set(LIB_FILES
     src/nova.cpp
@@ -30,7 +38,7 @@ target_link_libraries(example
                       nova
                       libboost_thread-mt.a
                       libboost_system-mt.a
-                      glew32
-                      glfw3
+                      ${GLEW_LIBRARY}
+                      ${GLFW_LIBRARY}
                       gdi32
                       opengl32)
