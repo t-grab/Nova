@@ -54,7 +54,7 @@ if (WIN32)
 
     find_library(GLEW_LIBRARY
         NAMES
-            glew GLEW glew32s glew32
+            libglew32.a
         HINTS
             "${GLEW_LOCATION}/lib"
             "$ENV{GLEW_LOCATION}/lib"
@@ -85,7 +85,7 @@ if (${CMAKE_HOST_UNIX})
     )
     find_library( GLEW_LIBRARY
         NAMES
-            GLEW glew
+            libglew32.a
         HINTS
             "${GLEW_LOCATION}/lib"
             "$ENV{GLEW_LOCATION}/lib"

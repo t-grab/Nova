@@ -6,6 +6,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(BOOST_USE_STATIC_LIBS ON)
+set(GLEW_GLEW_STATIC ON)
+
 find_package(BOOST REQUIRED)
 find_package(GLM REQUIRED)
 find_package(GLEW REQUIRED)
@@ -30,9 +33,7 @@ set(LIB_FILES
 
 set(TEST_FILES
     tests/test.cpp)
-
 add_library(nova ${LIB_FILES})
-
 add_executable(example ${TEST_FILES})
 target_link_libraries(example
                       nova
