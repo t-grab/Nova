@@ -11,8 +11,8 @@ std::vector<std::unique_ptr<Window>> Window::windows;
 
 Window::Window(const std::string& title, int width, int height,
                std::shared_ptr<Program> prg)
-        : handle(0), width{width}, height{height}, title{title},
-          running(), finished(), program{prg}
+        : m_handle(0), m_width{width}, m_height{height}, m_title{title},
+          m_running(), m_finished(), m_program{prg}
 { }
 
 Window::~Window() {
@@ -22,15 +22,20 @@ Window::~Window() {
     windows_mutex.unlock();    
 } 
 
+void Window::set_title(const std::string& title) {
+    m_title = title;
+    glfwSetWindowTitle(m_handle, title.c_str());
+}
+
 void Window::open() {
-    if (!init() || handle != nullptr)
+    if (!init() || m_handle != nullptr)
         return;
         
     (boost::thread{Window::main, std::ref(*this)}).detach();    
 }
 
 void Window::close() {
-    glfwSetWindowShouldClose(handle, GL_TRUE);
+    glfwSetWindowShouldClose(m_handle, GL_TRUE);
 }
 
 void Window::screenshot(const std::string& file_name) const {
@@ -38,32 +43,13 @@ void Window::screenshot(const std::string& file_name) const {
 }
 
 void Window::handle_keys() {
-    if (GLFW_PRESS == glfwGetKey(handle, GLFW_KEY_ESCAPE))
+    if (GLFW_PRESS == glfwGetKey(m_handle, GLFW_KEY_ESCAPE))
         close();
 }
 
-void Window::update_fps_counter() {
-    double current_seconds;
-    double elapsed_seconds;
-
-    current_seconds = glfwGetTime();
-    elapsed_seconds = current_seconds - frame_counter.previous_seconds;
-
-    if (elapsed_seconds > 0.25) {
-        frame_counter.previous_seconds = current_seconds;
-        double fps = frame_counter.frame_count / static_cast<double>(elapsed_seconds);
-        std::stringstream stream;
-        stream << title << ", OpenGL @ fps: " << std::fixed << std::setprecision(2) << fps;
-        glfwSetWindowTitle(handle, stream.str().c_str());
-        frame_counter.frame_count = 0;
-    }
-
-    frame_counter.frame_count++;
-}
-
 void Window::wait() {
-    std::unique_lock<std::mutex> running_lock(running);
-    finished.wait(running_lock);
+    std::unique_lock<std::mutex> running_lock(m_running);
+    m_finished.wait(running_lock);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +72,7 @@ Window& Window::create(const std::string& title, int width, int height,
 Window& Window::get_window(GLFWwindow* handle) {
     auto window_iter = std::find_if(windows.begin(), windows.end(),
     [handle](const std::unique_ptr<Window>& window) {
-        return window->handle == handle;
+        return window->m_handle == handle;
     });
 
     return *(window_iter->get());
@@ -94,43 +80,41 @@ Window& Window::get_window(GLFWwindow* handle) {
 
 void Window::glfw_window_size_callback(GLFWwindow* handle, int width, int height) {
     Window& window = get_window(handle); 
-    window.width = width;
-    window.height = height;
-    window.program->on_resize(width, height);
+    window.m_width = width;
+    window.m_height = height;
+    window.m_program->on_resize(width, height);
 }
 
 void Window::main(Window& window) {   
-    window.handle = glfwCreateWindow(window.width, window.height, window.title.c_str(), NULL, NULL);
-    if (!window.handle) {        
+    window.m_handle = glfwCreateWindow(window.m_width, window.m_height, window.m_title.c_str(), NULL, NULL);
+    if (!window.m_handle) {        
         glfwTerminate();
         error << "Window::open(): Could not open window with GLFW!" << Error::Throw;
     }
     
-    std::unique_lock<std::mutex> running_lock(window.running);
+    std::unique_lock<std::mutex> running_lock(window.m_running);
 
-    glfwMakeContextCurrent(window.handle);
+    glfwMakeContextCurrent(window.m_handle);
     glewExperimental = GL_TRUE;
     glewInit();
 
-    glfwSetWindowSizeCallback(window.handle, Window::glfw_window_size_callback);
+    glfwSetWindowSizeCallback(window.m_handle, Window::glfw_window_size_callback);
 
-    window.program->init();
-    while (!glfwWindowShouldClose(window.handle)) {
-        window.update_fps_counter();
+    window.m_program->init();
+    while (!glfwWindowShouldClose(window.m_handle)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, window.width, window.height);
+        glViewport(0, 0, window.m_width, window.m_height);
 
-        window.program->main();
+        window.m_program->main_loop();
 
-        glfwSwapBuffers(window.handle);
+        glfwSwapBuffers(window.m_handle);
         glfwPollEvents();
-        window.handle_keys();
     }    
-    window.program->finish();
+    window.m_program->finish();
 
-    glfwDestroyWindow(window.handle);
-    window.handle = 0;
+    glfwDestroyWindow(window.m_handle);
+    window.m_handle = 0;
 
     running_lock.unlock();
-    window.finished.notify_all();
+    window.m_finished.notify_all();
 }

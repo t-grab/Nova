@@ -9,13 +9,16 @@
 #include "../include/nova.h"
 
 class ExampleProgram : public Nova::Program {
+    Nova::FpsCounter fpsCounter;
     Nova::Points points;
     Nova::Colour colour;
+    std::shared_ptr<Nova::Shader> shader;
+    glm::mat4 transform;
 public:
     ExampleProgram();
 
     virtual void init();
-    virtual void main();
+    virtual void main_loop();
     virtual void finish();    
 };
 

@@ -10,3 +10,5 @@ void Nova::Program::init() {
 }
 
 void Nova::Program::on_resize(int width, int height) { }
+
+void Nova::Program::on_key() { }

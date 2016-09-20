@@ -3,8 +3,10 @@
 
 #include "std.h"
 
-struct Drawable {
-    virtual void draw() = 0;
-};
+namespace Nova {
+    struct Drawable {
+        virtual void draw() = 0;
+    };
+}
 
 #endif

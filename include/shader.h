@@ -3,17 +3,21 @@
 
 #include "std.h"
 
-class Shader {
-    GLuint handle;
+namespace Nova {
+    class Shader {
+        GLuint handle;
+        GLint matrix;
 
-    GLuint compileShader(const std::string& src, GLuint type);
+        GLuint compile_shader(const std::string& src, GLuint type);
 
-public:
-    static const char* stdVertex;
-    static const char* stdFragment;
+    public:
+        static const char* stdVertex;
+        static const char* stdFragment;
 
-    Shader(const std::string& vertexSrc, const std::string& fragmentSrc);    
-    void activate() const;
-};
+        Shader(const std::string& vertexSrc, const std::string& fragmentSrc);    
+        void activate() const;
+        void set_transform(const glm::mat4& mat);
+    };
+}
 
 #endif
