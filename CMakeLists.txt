@@ -10,6 +10,7 @@ set(BOOST_USE_STATIC_LIBS ON)
 set(GLEW_GLEW_STATIC ON)
 
 find_package(BOOST REQUIRED)
+find_package(PNG REQUIRED)
 find_package(GLM REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLFW REQUIRED)
@@ -33,10 +34,12 @@ set(LIB_FILES
     src/colour.cpp
     src/points.cpp)
 
-set(TEST_FILES
-    tests/test.cpp)
+set(EXAMPLE_FILES
+    example/main.cpp
+    example/read.cpp
+    example/prog.cpp)
 add_library(nova ${LIB_FILES})
-add_executable(example ${TEST_FILES})
+add_executable(example ${EXAMPLE_FILES})
 target_link_libraries(example
                       nova
                       libboost_thread-mt.a

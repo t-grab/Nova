@@ -3,19 +3,6 @@
 using namespace Nova;
 
 ////////////////////////////////////////////////////////////////////////////////
-////////// SUPPORT FUNCTIONS AND VARIABLES /////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void Nova::join(Window& window) {
-    window.getThread()->join();
-}
-
-void Nova::join(std::vector<std::reference_wrapper<Window>> windows) {
-    for (auto& window : windows)
-        join(window);
-}
-
-////////////////////////////////////////////////////////////////////////////////
 ////////// WINDOW IMPLEMENTATION ///////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +11,8 @@ std::vector<std::unique_ptr<Window>> Window::windows;
 
 Window::Window(const std::string& title, int width, int height,
                std::shared_ptr<Program> prg)
-        : handle(0), width{width}, height{height}, title{title}, thread{0}, program{prg}
+        : handle(0), width{width}, height{height}, title{title},
+          running(), finished(), program{prg}
 { }
 
 Window::~Window() {
@@ -34,29 +22,19 @@ Window::~Window() {
     windows_mutex.unlock();    
 } 
 
-boost::thread* Window::getThread() {
-    return thread;
-}
-
-bool Window::closing() {
-    return glfwWindowShouldClose(handle);
-}
-
 void Window::open() {
-    if (!init())
+    if (!init() || handle != nullptr)
         return;
         
-    handle = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
-    if (!handle) {        
-        glfwTerminate();
-        error << "Window::open(): Could not open window with GLFW!" << Error::Throw;
-    }    
-
-    thread = new boost::thread{Window::main, std::ref(*this)};    
+    (boost::thread{Window::main, std::ref(*this)}).detach();    
 }
 
 void Window::close() {
     glfwSetWindowShouldClose(handle, GL_TRUE);
+}
+
+void Window::screenshot(const std::string& file_name) const {
+    
 }
 
 void Window::handle_keys() {
@@ -81,6 +59,11 @@ void Window::update_fps_counter() {
     }
 
     frame_counter.frame_count++;
+}
+
+void Window::wait() {
+    std::unique_lock<std::mutex> running_lock(running);
+    finished.wait(running_lock);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +99,15 @@ void Window::glfw_window_size_callback(GLFWwindow* handle, int width, int height
     window.program->on_resize(width, height);
 }
 
-void Window::main(Window& window) {
+void Window::main(Window& window) {   
+    window.handle = glfwCreateWindow(window.width, window.height, window.title.c_str(), NULL, NULL);
+    if (!window.handle) {        
+        glfwTerminate();
+        error << "Window::open(): Could not open window with GLFW!" << Error::Throw;
+    }
+    
+    std::unique_lock<std::mutex> running_lock(window.running);
+
     glfwMakeContextCurrent(window.handle);
     glewExperimental = GL_TRUE;
     glewInit();
@@ -136,4 +127,10 @@ void Window::main(Window& window) {
         window.handle_keys();
     }    
     window.program->finish();
+
+    glfwDestroyWindow(window.handle);
+    window.handle = 0;
+
+    running_lock.unlock();
+    window.finished.notify_all();
 }

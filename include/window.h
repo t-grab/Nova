@@ -12,7 +12,8 @@ namespace Nova {
         int width;
         int height;
         std::string title;
-        boost::thread* thread;
+        std::mutex running;
+        std::condition_variable finished;        
         std::shared_ptr<Nova::Program> program;
 
         struct FrameCounter {
@@ -33,17 +34,16 @@ namespace Nova {
         
     public:        
         ~Window();        
-        boost::thread* getThread();                
-        bool closing();
+                
         void open();
         void close();  
+        void wait();
+
+        void screenshot(const std::string& file_name) const;
 
         static Window& create(const std::string& title, int width, int height,
                               std::shared_ptr<Nova::Program> prg);      
     };
-
-    void join(Window& window);
-    void join(std::vector<std::reference_wrapper<Window>> windows);
 }
 
 #endif
