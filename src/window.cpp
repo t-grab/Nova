@@ -118,3 +118,90 @@ void Window::main(Window& window) {
     running_lock.unlock();
     window.m_finished.notify_all();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////// WINDOW2 IMPLEMENTATION //////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+std::vector<Window2*> Window2::windows;
+std::mutex Window2::static_mutex;
+
+Window2::Window2(int width, int height)
+        : m_window{nullptr}, m_width{width}, m_height{height} {
+    Window2::static_mutex.lock();
+    if (!Nova::init())
+        throw std::runtime_error("Nova::Window::Window(): Could not initialize Nova");
+    Window2::windows.push_back(this);
+    Window2::static_mutex.unlock();
+}
+
+Window2::~Window2() {
+    Window2::static_mutex.lock();
+    if (Window2::windows.size() < 2U)
+        Nova::terminate();
+    Window2::static_mutex.unlock();
+}
+
+void Window2::init_context() {
+    if (m_window == nullptr) {
+        glfwTerminate();
+        throw std::runtime_error("Nova::Window::init_context(): Could not create window");
+    }
+
+    glfwMakeContextCurrent(m_window);
+    glewExperimental = GL_TRUE;
+    glewInit();
+
+    glfwSetWindowSizeCallback(m_window, Window2::resize_callback);
+}
+
+void Window2::resize_callback(GLFWwindow* window, int width, int height) {
+    auto window_iter = std::find_if(Window2::windows.begin(), Window2::windows.end(),
+        [&](Window2* nova) {
+            return nova->m_window == window;
+        }
+    );
+
+    (*window_iter)->m_width = width;
+    (*window_iter)->m_height = height;
+}
+
+void Window2::set_title(const std::string& title) {
+    if (m_window != nullptr)
+        glfwSetWindowTitle(m_window, title.c_str());
+}
+
+void Window2::open(const std::string& title) {
+    m_window = glfwCreateWindow(m_width, m_height, title.c_str(), nullptr, nullptr);
+    init_context();
+}
+
+void Window2::open(const std::string& title, Window2& context) {
+    if (context.m_window != nullptr) {
+        m_window = glfwCreateWindow(m_width, m_height, title.c_str(), nullptr, context.m_window);
+        init_context();
+    } else {
+        open(title);
+    }
+}
+
+void Window2::close() {
+    if (m_window != nullptr)
+        glfwSetWindowShouldClose(m_window, GL_TRUE);
+}
+
+void Window2::destroy() {
+    if (m_window != nullptr) {
+        glfwDestroyWindow(m_window);
+        m_window = nullptr;
+    }
+}
+
+void Window2::screenshot(const std::string& file_name) {
+
+}
+
+void Window2::swap_buffers() {
+    glfwSwapBuffers(m_window);
+}
+

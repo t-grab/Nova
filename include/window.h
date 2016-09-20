@@ -42,6 +42,32 @@ namespace Nova {
         static Window& create(const std::string& title, int width, int height,
                               std::shared_ptr<Nova::Program> prg);      
     };
+
+    class Window2 {
+        GLFWwindow* m_window;
+        int m_width;
+        int m_height;
+
+        void init_context();
+
+        static std::vector<Window2*> windows;
+        static std::mutex static_mutex;
+
+        static void resize_callback(GLFWwindow* window, int width, int height);
+    public:
+        Window2(int width = 640, int height = 480);
+        ~Window2();
+
+        void set_title(const std::string& title);
+
+        void open(const std::string& title);
+        void open(const std::string& title, Window2& context);
+        void close();
+        void destroy();
+        void screenshot(const std::string& file_name);
+
+        void swap_buffers();
+    };
 }
 
 #endif
