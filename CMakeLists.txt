@@ -29,7 +29,9 @@ set(LIB_FILES
     src/std.cpp
     src/shader.cpp
     src/window.cpp
-    src/program.cpp)
+    src/program.cpp
+    src/colour.cpp
+    src/points.cpp)
 
 set(TEST_FILES
     tests/test.cpp)

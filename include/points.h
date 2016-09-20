@@ -3,24 +3,23 @@
 #define NOVA_POINTS_H
 
 #include "std.h"
-#include "renderable.h"
+#include "drawable.h"
+#include "colour.h"
 
-template<uint N = 3>
-class Point {
-    GLfloat m_pos[N];
-    GLfloat m_col[4];
-public:
-    Point();
-};
+namespace Nova {
+    class Points : public Drawable {
+        std::vector<GLfloat> m_points;
+        std::vector<GLfloat> m_colours;
+        GLuint m_vao;
 
-template<uint N = 3>
-class Points : public Renderable {
-    std::vector<Point> m_points;
-public:
-    Points();
-    ~Points();
+    public:
+        Points();
+        ~Points();
 
-    virtual void render();
-};
+        void push_back(GLfloat x, GLfloat y, const Colour& col);
+        void push_back(GLfloat x, GLfloat y, GLfloat z, const Colour& col);
+        virtual void draw();
+    };
+}
 
 #endif

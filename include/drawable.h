@@ -3,8 +3,8 @@
 
 #include "std.h"
 
-struct Renderable {
-    virtual void render() = 0;
+struct Drawable {
+    virtual void draw() = 0;
 };
 
 #endif

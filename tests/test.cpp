@@ -9,37 +9,24 @@ const std::string TITLE = "Nova example Application";
 const std::string END = "Closing Nova example application";
 
 class ExampleProgram : public Nova::Program {
-    GLuint m_vao;
+    Nova::Points points;
+    Nova::Colour colour;
 public:
+    ExampleProgram() : points(), colour(0.0f, 0.0f, 0.0f, 1.0f) {}
+
     void init() {
         Nova::Program::init();
 
-        GLfloat points[] = {
-             0.0f,  0.5f,  0.0f,
-             0.5f, -0.5f,  0.0f,
-            -0.5f, -0.5f,  0.0f, 
-        };
-
-        GLuint vbo = 0;
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-
-        m_vao = 0;
-        glGenVertexArrays(1, &m_vao);
-        glBindVertexArray(m_vao);
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        points.push_back(0.25f,  0.25f, colour);
+        points.push_back(0.5f,  0.5f, colour);
+        points.push_back(0.5f, -0.5f, colour);
 
         Shader shader(Shader::stdVertex, Shader::stdFragment);
-        glUseProgram(shader.id());
-        glUniform4f(shader.colour(), 0.0f, 0.0f, 0.0f, 1.0f);
+        shader.activate();
     }
 
     void main() {
-        glBindVertexArray(m_vao);
-        glDrawArrays(GL_POINTS, 0, 3);
+        points.draw();
     }
 
     void finish() {

@@ -5,6 +5,7 @@
 #include "shader.h"
 #include "window.h"
 #include "program.h"
+#include "points.h"
 
 namespace Nova {
     bool init();

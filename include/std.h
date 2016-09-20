@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <algorithm>
+#include <unordered_map>
 
 #define GLEW_STATIC
 
