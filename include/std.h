@@ -21,53 +21,59 @@
 
 typedef unsigned int uint;
 
-struct Error {
-    std::stringstream m_stream;
+namespace Nova {
+    typedef GLint       int_t;
+    typedef GLfloat     float_t;
+    typedef GLbitfield  bitfield_t;
 
-public:
-    enum Action { Throw };
+    struct Error {
+        std::stringstream m_stream;
 
-    Error();
+    public:
+        enum Action { Throw };
 
-    void operator<<(Action action);
-    template<typename T> Error& operator<<(const T& val);
-};
+        Error();
 
-extern Error error;
+        void operator<<(Action action);
+        template<typename T> Error& operator<<(const T& val);
+    };
 
-class Log {
-    std::string m_file_name;
-    std::stringstream m_stream;
+    extern Error error;
 
-public:
-    enum Action { Commit, RollBack };
+    class Log {
+        std::string m_file_name;
+        std::stringstream m_stream;
 
-    Log(const std::string& file_name);
-    
-    void operator<<(Action action);
-    template<typename T> Log& operator<<(const T& val);
-};
+    public:
+        enum Action { Commit, RollBack };
 
-extern Log glLog;
+        Log(const std::string& file_name);
+        
+        void operator<<(Action action);
+        template<typename T> Log& operator<<(const T& val);
+    };
+
+    extern Log glLog;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////// LOG IMPLEMENTATION //////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-template<typename T>
-Log& Log::operator<<(const T& val) {
-    m_stream << val;
-    return *this;
-}
+    template<typename T>
+    Log& Log::operator<<(const T& val) {
+        m_stream << val;
+        return *this;
+    }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////// ERRORTHROWER IMPLEMENTATION /////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-template<typename T>
-Error& Error::operator<<(const T& val) {
-    m_stream << val;
-    return *this;
-}
+    template<typename T>
+    Error& Error::operator<<(const T& val) {
+        m_stream << val;
+        return *this;
+    }
+};
 
 #endif

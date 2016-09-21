@@ -3,7 +3,7 @@
 std::vector<glm::vec3> read(const std::string& file_name) {
     std::ifstream file(file_name);
     if (!file) {
-        error << "read(): Could not open file '" << file_name << "'" << Error::Throw;
+        Nova::error << "read(): Could not open file '" << file_name << "'" << Nova::Error::Throw;
     }
 
     std::vector<glm::vec3> result;

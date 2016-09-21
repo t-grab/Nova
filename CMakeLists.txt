@@ -33,7 +33,9 @@ set(LIB_FILES
     src/program.cpp
     src/colour.cpp
     src/points.cpp
-    src/fpsCounter.cpp)
+    src/fpsCounter.cpp
+    src/context.cpp
+    src/program2.cpp)
 
 set(EXAMPLE_FILES
     example/main.cpp

@@ -123,16 +123,13 @@ void Window::main(Window& window) {
 ////////// WINDOW2 IMPLEMENTATION //////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-std::vector<Window2*> Window2::windows;
+std::vector<std::unique_ptr<Window2>> Window2::windows;
 std::mutex Window2::static_mutex;
 
 Window2::Window2(int width, int height)
         : m_window{nullptr}, m_width{width}, m_height{height} {
-    Window2::static_mutex.lock();
     if (!Nova::init())
         throw std::runtime_error("Nova::Window::Window(): Could not initialize Nova");
-    Window2::windows.push_back(this);
-    Window2::static_mutex.unlock();
 }
 
 Window2::~Window2() {
@@ -157,7 +154,7 @@ void Window2::init_context() {
 
 void Window2::resize_callback(GLFWwindow* window, int width, int height) {
     auto window_iter = std::find_if(Window2::windows.begin(), Window2::windows.end(),
-        [&](Window2* nova) {
+        [&](const std::unique_ptr<Window2>& nova) {
             return nova->m_window == window;
         }
     );
@@ -166,9 +163,21 @@ void Window2::resize_callback(GLFWwindow* window, int width, int height) {
     (*window_iter)->m_height = height;
 }
 
+int Window2::get_width() const {
+    return m_width;
+}
+
+int Window2::get_height() const {
+    return m_height;
+}
+
 void Window2::set_title(const std::string& title) {
     if (m_window != nullptr)
         glfwSetWindowTitle(m_window, title.c_str());
+}
+
+bool Window2::is_open() const {
+    return glfwWindowShouldClose(m_window);
 }
 
 void Window2::open(const std::string& title) {
@@ -205,3 +214,14 @@ void Window2::swap_buffers() {
     glfwSwapBuffers(m_window);
 }
 
+Window2& Window2::create(int width, int height) {
+    std::unique_ptr<Window2> new_window{std::move(new Window2(width, height))};
+
+    static_mutex.lock();
+    Window2::windows.push_back(std::move(new_window));
+    std::unique_ptr<Window2>& win_ptr{Window2::windows.back()};
+    Window2& win_ref = *(win_ptr.get());
+    static_mutex.unlock();
+
+    return win_ref;
+}

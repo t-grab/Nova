@@ -3,6 +3,7 @@
 
 #include "std.h"
 #include "program.h"
+#include "context.h"
 #include <mutex>
 #include <boost/thread.hpp>
 
@@ -48,17 +49,19 @@ namespace Nova {
         int m_width;
         int m_height;
 
+        Window2(int width = 640, int height = 480);
         void init_context();
 
-        static std::vector<Window2*> windows;
+        static std::vector<std::unique_ptr<Window2>> windows;
         static std::mutex static_mutex;
 
         static void resize_callback(GLFWwindow* window, int width, int height);
     public:
-        Window2(int width = 640, int height = 480);
         ~Window2();
-
+        int get_width() const;
+        int get_height() const;
         void set_title(const std::string& title);
+        bool is_open() const;
 
         void open(const std::string& title);
         void open(const std::string& title, Window2& context);
@@ -67,6 +70,8 @@ namespace Nova {
         void screenshot(const std::string& file_name);
 
         void swap_buffers();
+
+        static Window2& create(int width = 640, int height = 480);
     };
 }
 
