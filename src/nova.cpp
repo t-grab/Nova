@@ -4,6 +4,8 @@ using namespace Nova;
 Log Nova::glLog("gl.log");
 std::mutex init_mutex;
 
+static bool initialized = false;
+
 static void glfwErrorCallback(int error, const char* description) {
     glLog << "GLFW Error: code " << error << ", msg: " << description << "\n"
           << Log::Commit; 
@@ -11,7 +13,6 @@ static void glfwErrorCallback(int error, const char* description) {
 
 bool Nova::init() {
     init_mutex.lock();
-    static bool initialized = false;
 
     if (!initialized) {
         glLog << "Starting GLFW\n" << glfwGetVersionString() << "\n" << Log::Commit;
@@ -38,7 +39,7 @@ bool Nova::init() {
 
 void Nova::terminate() {
     init_mutex.lock();
-    if (Nova::init())
+    if (initialized)
         glfwTerminate();
     init_mutex.unlock();
 }

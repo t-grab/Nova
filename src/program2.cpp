@@ -35,9 +35,7 @@ void Program2::main() {
     while (m_window.is_open()) {
         m_context.clear(OpenGLContext::Color | OpenGLContext::Depth);
         m_context.viewport(0, 0, m_window.get_width(), m_window.get_height());
-
-        std::cout << "Window is open" << std::endl;
-
+glfwPollEvents();
         m_window.swap_buffers();
     }
 }
