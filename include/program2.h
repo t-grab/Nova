@@ -27,6 +27,7 @@ namespace Nova {
 
         virtual void init();
         virtual void main();
+        virtual void loop();
         virtual void finish();
 
         void join();

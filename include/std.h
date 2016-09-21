@@ -23,6 +23,7 @@ typedef unsigned int uint;
 
 namespace Nova {
     typedef GLint       int_t;
+    typedef GLuint      uint_t;
     typedef GLfloat     float_t;
     typedef GLbitfield  bitfield_t;
 

@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include "../include/nova.h"
-
+/*
 class ExampleProgram : public Nova::Program {
     Nova::FpsCounter fpsCounter;
     Nova::Points points;
@@ -21,7 +21,7 @@ public:
     virtual void main_loop();
     virtual void finish();    
 };
-
+*/
 std::vector<glm::vec3> read(const std::string& file_name); 
 
 #endif

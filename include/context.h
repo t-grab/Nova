@@ -13,8 +13,10 @@ namespace Nova {
             Stencil = GL_STENCIL_BUFFER_BIT
         };
 
+        void clear_color(float_t r, float_t g, float_t b, float_t a);
         void clear(bitfield_t bits);
         void viewport(int_t x, int_t y, int width, int height);
+        void set_uniform_matrix(int_t location, int count, bool transpose, glm::mat4 value);
     };
 }
 

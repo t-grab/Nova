@@ -29,15 +29,23 @@ void Program2::set_title(const std::string& title) {
 
 void Program2::init() {
     m_window.open(m_title);
+    m_context.clear_color(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void Program2::main() {
     while (m_window.is_open()) {
         m_context.clear(OpenGLContext::Color | OpenGLContext::Depth);
         m_context.viewport(0, 0, m_window.get_width(), m_window.get_height());
-glfwPollEvents();
+
+        loop();
+
+        glfwPollEvents();
         m_window.swap_buffers();
     }
+}
+
+void Program2::loop() {
+    
 }
 
 void Program2::finish() {

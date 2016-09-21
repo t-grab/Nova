@@ -1,5 +1,5 @@
 #include "main.h"
-
+/*
 ExampleProgram::ExampleProgram()
         : fpsCounter(), points(), colour(0.0f, 0.0f, 0.0f, 1.0f),
           shader(0), transform(1) {
@@ -27,3 +27,4 @@ void ExampleProgram::main_loop() {
 
 void ExampleProgram::finish() {
 }
+*/
