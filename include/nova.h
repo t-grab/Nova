@@ -8,6 +8,7 @@
 #include "points.h"
 #include "fpsCounter.h"
 #include "context.h"
+#include "program2.h"
 
 namespace Nova {
     bool init();

@@ -36,12 +36,18 @@ void Program2::main() {
         m_context.clear(OpenGLContext::Color | OpenGLContext::Depth);
         m_context.viewport(0, 0, m_window.get_width(), m_window.get_height());
 
+        std::cout << "Window is open" << std::endl;
+
         m_window.swap_buffers();
     }
 }
 
 void Program2::finish() {
     m_window.destroy();
+}
+
+void Program2::join() {
+    m_thread.join();
 }
 
 void Program2::start_thread(std::shared_ptr<Program2> program) {

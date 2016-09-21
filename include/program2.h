@@ -29,6 +29,8 @@ namespace Nova {
         virtual void main();
         virtual void finish();
 
+        void join();
+
         template<typename T, typename... Args> static std::shared_ptr<T> run(Args... args);
     };
     

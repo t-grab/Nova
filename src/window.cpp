@@ -177,7 +177,7 @@ void Window2::set_title(const std::string& title) {
 }
 
 bool Window2::is_open() const {
-    return glfwWindowShouldClose(m_window);
+    return !glfwWindowShouldClose(m_window);
 }
 
 void Window2::open(const std::string& title) {

@@ -9,16 +9,23 @@ using std::endl;
 const std::string TITLE = "Nova example Application";
 const std::string END = "Closing Nova example application";
 
+struct TestProg : public Nova::Program2 {
+    TestProg() : Nova::Program2("Nova::Program2") { }
+};
+
 int main() {
     try {
         std::cout << TITLE << std::endl;
 
-        auto program = std::make_shared<ExampleProgram>();
+        auto program = Nova::Program2::run<TestProg>();
+        program->join();
+
+/*        auto program = std::make_shared<ExampleProgram>();
         Nova::Window& window = Nova::Window::create("Window 1", 640, 480, program);
 
         window.open();
         window.wait();
-
+*/
         std::cout << END << std::endl;
         return 0;
     }
